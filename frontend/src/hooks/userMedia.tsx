@@ -2,45 +2,62 @@ import { useState } from "react";
 
 export function useMediaStream() {
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCameraOff, setIsCameraOff] = useState(false);
 
-  const startStream = async () => {
+  const startStream = async (): Promise<MediaStream | null> => {
     try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      console.log("Devices:", devices);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: false, // use false on your desktop
         audio: true,
       });
 
       setStream(mediaStream);
-      console.log("Media stream started:", mediaStream);
+      console.log("Media Stream:", mediaStream);
+      return mediaStream;
     } catch (error: any) {
-      console.error("Media error:", error);
-
-      switch (error.name) {
-        case "NotAllowedError":
-          alert("Permission denied");
-          break;
-        case "NotFoundError":
-          alert("Camera or microphone not found");
-          break;
-        case "NotReadableError":
-          alert("Device already in use");
-          break;
-        default:
-          alert(`Unknown error: ${error.name}`);
-      }
+      return null;
     }
+  };
+
+  const toggleMute = () => {
+    if (!stream) return;
+
+    const audioTrack = stream.getAudioTracks()[0];
+    if (!audioTrack) return;
+
+    audioTrack.enabled = !audioTrack.enabled;
+    setIsMuted(!audioTrack.enabled);
+  };
+
+  const toggleCamera = () => {
+    if (!stream) return;
+
+    const videoTrack = stream.getVideoTracks()[0];
+    if (!videoTrack) {
+      console.log("No camera available");
+      return;
+    }
+
+    videoTrack.enabled = !videoTrack.enabled;
+    setIsCameraOff(!videoTrack.enabled);
   };
 
   const stopStream = () => {
     stream?.getTracks().forEach((track) => track.stop());
+
     setStream(null);
+    setIsMuted(false);
+    setIsCameraOff(false);
   };
 
   return {
     stream,
     startStream,
     stopStream,
+    toggleMute,
+    toggleCamera,
+    isMuted,
+    isCameraOff,
   };
 }
