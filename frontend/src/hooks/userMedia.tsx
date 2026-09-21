@@ -7,8 +7,10 @@ export function useMediaStream() {
 
   const startStream = async (): Promise<MediaStream | null> => {
     try {
+      console.log("navigator:", navigator);
+      console.log("mediaDevices:", navigator.mediaDevices);
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: false, // use false on your desktop
+        video: false,
         audio: true,
       });
 
@@ -16,31 +18,23 @@ export function useMediaStream() {
       console.log("Media Stream:", mediaStream);
       return mediaStream;
     } catch (error: any) {
+      console.error("Media error:", error);
+      switch (error.name) {
+        case "NotAllowedError":
+          alert("Permission denied");
+          break;
+        case "NotFoundError":
+          alert("Camera or microphone not found");
+          break;
+        case "NotReadableError":
+          alert("Device already in use");
+          break;
+        default:
+          alert(`Unknown error: ${error.TypeError}`);
+          console.log(error.TypeError);
+      }
       return null;
     }
-  };
-
-  const toggleMute = () => {
-    if (!stream) return;
-
-    const audioTrack = stream.getAudioTracks()[0];
-    if (!audioTrack) return;
-
-    audioTrack.enabled = !audioTrack.enabled;
-    setIsMuted(!audioTrack.enabled);
-  };
-
-  const toggleCamera = () => {
-    if (!stream) return;
-
-    const videoTrack = stream.getVideoTracks()[0];
-    if (!videoTrack) {
-      console.log("No camera available");
-      return;
-    }
-
-    videoTrack.enabled = !videoTrack.enabled;
-    setIsCameraOff(!videoTrack.enabled);
   };
 
   const stopStream = () => {
@@ -50,14 +44,42 @@ export function useMediaStream() {
     setIsMuted(false);
     setIsCameraOff(false);
   };
+  const toggleMute = () => {
+    if (!stream) return;
+
+    const audioTrack = stream.getAudioTracks()[0];
+
+    if (!audioTrack) return;
+
+    audioTrack.enabled = !audioTrack.enabled;
+    setIsMuted(!audioTrack.enabled);
+
+    console.log("Microphone:", audioTrack.enabled ? "ON" : "OFF");
+  };
+
+  const toggleCamera = () => {
+    if (!stream) return;
+
+    const videoTrack = stream.getVideoTracks()[0];
+
+    if (!videoTrack) {
+      console.log("No camera available");
+      return;
+    }
+
+    videoTrack.enabled = !videoTrack.enabled;
+    setIsCameraOff(!videoTrack.enabled);
+
+    console.log("Camera:", videoTrack.enabled ? "ON" : "OFF");
+  };
 
   return {
     stream,
     startStream,
     stopStream,
-    toggleMute,
     toggleCamera,
-    isMuted,
+    toggleMute,
     isCameraOff,
+    isMuted,
   };
 }

@@ -85,6 +85,7 @@ export function usePeerConnection() {
 
     await flushPendingCandidates();
 
+
     const answer = await peerRef.current.createAnswer();
     await peerRef.current.setLocalDescription(answer);
 
@@ -100,7 +101,6 @@ export function usePeerConnection() {
     );
 
     await flushPendingCandidates();
-
     console.log("Remote answer set");
   };
 

@@ -11,26 +11,8 @@ function Room() {
   const socketRef = useRef<WebSocket | null>(null);
   const myId = useRef(crypto.randomUUID());
 
-  const {
-    stream,
-    startStream,
-    stopStream,
-    toggleCamera,
-    toggleMute,
-    isCameraOff,
-    isMuted,
-  } = useMediaStream();
-
-  const {
-    remoteStream,
-    connectionState,
-    createPeer,
-    createOffer,
-    createAnswer,
-    setRemoteAnswer,
-    addIceCandidate,
-    closePeer,
-  } = usePeerConnection();
+  const { stream, startStream, stopStream, toggleCamera, toggleMute, isCameraOff, isMuted,} = useMediaStream();
+  const { remoteStream, connectionState, createPeer, createOffer, createAnswer, setRemoteAnswer, addIceCandidate, closePeer } = usePeerConnection();
 
   useEffect(() => {
     const initialize = async () => {
@@ -150,14 +132,7 @@ function Room() {
       <h1>Room: {roomId}</h1>
       <p>Status: {connectionState}</p>
 
-      <button
-        onClick={handleCall}
-        disabled={
-          connectionState === "connecting" || connectionState === "connected"
-        }
-      >
-        Start Call
-      </button>
+      <button onClick={handleCall}>Start Call</button>
 
       <h3>Local</h3>
       <VideoPlayer stream={stream} muted />
